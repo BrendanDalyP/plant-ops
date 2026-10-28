@@ -1,0 +1,8 @@
+# PURPOSE     The hosted agent's packages: Foundry installs these when it builds the agent (Part 7).
+# PSEUDOCODE  each package pinned exactly as in requirements-dev.txt, so the agent runs in Foundry with what the tests ran with
+agent-framework-core==1.24.0
+agent-framework-foundry==1.16.0
+agent-framework-foundry-hosting==1.0.0b261030
+azure-ai-projects==2.7.0
+azure-identity==1.27.0
+python-dotenv==1.2.4

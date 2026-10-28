@@ -27,3 +27,21 @@ def scrap_rate_by_plant(batches: list[Batch], start: date, end: date) -> dict[st
             produced[b.plant_id] += b.square_feet_produced
             scrap[b.plant_id] += b.scrap_square_feet
     return {p: round(scrap[p] / produced[p] * 100, 2) if produced[p] else None for p in produced}
+
+
+def square_feet_per_run_hour_by_plant(batches: list[Batch], start: date, end: date) -> dict[str, float | None]:
+    """Square feet produced per run hour, per plant, for batches from start to end.
+
+    PURPOSE     How much board each plant runs per hour of machine time: the data team's Square Feet per Run Hour.
+    PSEUDOCODE  keep batches whose shift_date is from start to end, both days included
+                group them by plant
+                rate = total square feet produced / total run hours, rounded to 1 place
+                a plant with no run hours in the period gets None: its rate is unknown, not 0
+    """
+    produced: dict[str, int] = defaultdict(int)
+    hours: dict[str, float] = defaultdict(float)
+    for b in batches:
+        if start <= b.shift_date <= end:
+            produced[b.plant_id] += b.square_feet_produced
+            hours[b.plant_id] += b.run_hours
+    return {p: round(produced[p] / hours[p], 1) if hours[p] else None for p in produced}

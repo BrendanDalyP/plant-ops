@@ -35,7 +35,7 @@ a scrap rate, say which source and which definition it comes from, and never com
 sources without saying that they're defined differently."""
 
 
-def build_agent(client=None, *, credential=None) -> Agent:
+def build_agent(client=None, *, credential=None, hosted=False) -> Agent:
     """Build the assistant.
 
     PURPOSE     The same agent everywhere: tests hand it a scripted stand-in for the model; everything else gets
@@ -43,6 +43,7 @@ def build_agent(client=None, *, credential=None) -> Agent:
     PSEUDOCODE  client = the one given, or the model deployment named in the environment, in the Foundry project
                          named in the environment, signed in as you
                 tools = this app's tools, plus the class's Foundry toolbox (Ops_Agent) when TOOLBOX_ENDPOINT is set
+                hosted: the host keeps the conversation, so the model service mustn't store it as well
                 return an Agent with the name, the instructions above and those tools
     """
     credential = credential or DefaultAzureCredential()
@@ -52,4 +53,5 @@ def build_agent(client=None, *, credential=None) -> Agent:
     tools = [*TOOLS]
     if os.environ.get("TOOLBOX_ENDPOINT"):
         tools.append(FoundryToolbox(credential))  # reads TOOLBOX_ENDPOINT; signs every call in with credential
-    return Agent(client=client, name=NAME, instructions=INSTRUCTIONS, tools=tools)
+    options = {"default_options": {"store": False}} if hosted else {}
+    return Agent(client=client, name=NAME, instructions=INSTRUCTIONS, tools=tools, **options)

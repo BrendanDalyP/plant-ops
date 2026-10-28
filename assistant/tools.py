@@ -18,7 +18,7 @@ from pydantic import Field
 from plant_ops.batches import read_batches
 from plant_ops.reference_data import DATA, load_asset_plants, load_sku_ids
 from plant_ops.rules import check, failing_ids
-from plant_ops.stats import scrap_rate_by_plant
+from plant_ops.stats import scrap_rate_by_plant, square_feet_per_run_hour_by_plant
 from plant_ops.store import BatchStore
 
 Day = Annotated[str, Field(description="A date as YYYY-MM-DD, for example 2026-09-01")]
@@ -94,4 +94,29 @@ def check_batch_file(
             "failures": failures}
 
 
-TOOLS = [scrap_rates, check_batch_file]
+@tool(name="square_feet_per_run_hour", approval_mode="never_require",
+      description="Every plant's square feet produced per run hour, for batches from start to end (both days "
+                  "included), highest first. Definition: total square feet produced / total run hours, the same "
+                  "as the data team's Square Feet per Run Hour measure. Plants with no run hours are left out.")
+def square_feet_per_run_hour(start: Day, end: Day) -> dict:
+    """Every plant's square feet per run hour from start to end, highest first.
+
+    PURPOSE     How much board each plant runs per hour of machine time, by the definition Ops_Model uses.
+    PSEUDOCODE  start, end not YYYY-MM-DD -> error asking for YYYY-MM-DD
+                rates = square_feet_per_run_hour_by_plant(the history, start, end), plants with no run hours left out
+                none -> error saying which dates the history covers
+                return the dates, the definition, and [{plant_id, square_feet_per_run_hour}] highest first
+    """
+    try:
+        first, last = date.fromisoformat(start), date.fromisoformat(end)
+    except ValueError:
+        return {"error": f"Dates must be YYYY-MM-DD; got start={start!r}, end={end!r}."}
+    rates = {p: r for p, r in square_feet_per_run_hour_by_plant(history().all(), first, last).items() if r is not None}
+    if not rates:
+        return {"error": f"No batches from {first} to {last}. {covers()}"}
+    ranked = sorted(rates.items(), key=lambda pr: (-pr[1], pr[0]))
+    return {"start": str(first), "end": str(last), "definition": "total square feet produced / total run hours",
+            "rates": [{"plant_id": p, "square_feet_per_run_hour": r} for p, r in ranked]}
+
+
+TOOLS = [scrap_rates, check_batch_file, square_feet_per_run_hour]

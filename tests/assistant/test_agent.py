@@ -50,3 +50,9 @@ def test_the_class_toolbox_when_toolbox_endpoint_is_set(agent_module, scripted_m
     agent = agent_module.build_agent(client=scripted_model())
     toolboxes = [t for t in agent.mcp_tools if isinstance(t, FoundryToolbox)]
     assert len(toolboxes) == 1, "Part 4: add FoundryToolbox to the agent's tools when TOOLBOX_ENDPOINT is set"
+
+
+def test_the_model_is_offered_square_feet_per_run_hour(agent_module, tools, scripted_model):
+    model = scripted_model("Hello.")
+    ask(agent_module.build_agent(client=model), "Hi")
+    assert "square_feet_per_run_hour" in model.offered_tools()

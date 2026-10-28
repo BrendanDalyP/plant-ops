@@ -31,3 +31,7 @@
 - question: How many months of production does the lakehouse behind Ops_Agent hold?
   expect: ["33"]
   needs: ops-agent
+
+- question: How much board did P01 run per hour of machine time in September 2026?
+  expect: ["396.4"]
+  tools: [square_feet_per_run_hour]

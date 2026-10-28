@@ -26,6 +26,7 @@ Both are ratios of sums, never averages of each batch's rate. They answer differ
 | --- | --- | --- |
 | `scrap_rates(start, end)` | Every plant's scrap rate from `start` to `end` (both days included, dates as YYYY-MM-DD), by this app's definition, highest first. No batches in those dates: an error that says which dates the history covers | Part 3 |
 | `check_batch_file(file_name)` | Runs every rule in `docs/rules.md` on a batch file in `data/`, as `POST /imports` would, without loading it: how many batches, how many pass, each failing batch with its rule, and whether the file would load. Takes a bare file name only, such as `batch_2026-10-01.csv`: anything else is an error | Part 3 |
+| `square_feet_per_run_hour(start, end)` | Every plant's square feet produced per run hour from `start` to `end`: total square feet produced / total run hours, as the data team's `Square Feet per Run Hour` measure defines it, highest first | Part 6, by the cloud agent |
 | `Ops_Agent` | The Fabric data agent from Session 2, through the class's Foundry toolbox: the tenant's 33 months, by the company's definition | Part 4 |
 
 Tools only read. A tool that changes anything needs a person's approval first.
@@ -42,5 +43,6 @@ Tools only read. A tool that changes anything needs a person's approval first.
 | 6 | What's the weather in Chicago? | none | That it answers production questions only |
 | 7 | What was P01's scrap rate in August 2026? | `Ops_Agent` | The app's history has no August. By the company's Scrap Rate %: 5.48% (251 batches). By this app's definition it would be 5.79% |
 | 8 | How many months of production does the lakehouse hold? | `Ops_Agent` | 33 |
+| 9 | How much board did P01 run per hour of machine time in September 2026? | `square_feet_per_run_hour` | 63,396.4 square feet per run hour (86,408,665 square feet in 1,362.99 run hours) |
 
 Every plant, September 2026, by this app's definition: P08 6.56, P04 6.47, P05 6.47, P03 6.39, P06 6.23, P02 6.02, P07 6.01, P01 5.99.

@@ -6,11 +6,14 @@ RUN      uvicorn plant_ops.api:create_app --factory --reload
 
 from __future__ import annotations
 
+import os
+from collections.abc import Callable
 from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 
 from plant_ops.batches import parse_batches
 from plant_ops.reference_data import DATA, load_asset_plants, load_sku_ids
@@ -19,7 +22,36 @@ from plant_ops.stats import scrap_rate_by_plant
 from plant_ops.store import BatchStore
 
 
-def create_app(history_csv: str | Path = DATA / "production_history.csv") -> FastAPI:
+class Question(BaseModel):
+    question: str = Field(min_length=1, description="A question about production, in plain English")
+
+
+def hosted_assistant() -> Callable[[str], str] | None:
+    """The hosted assistant from Part 7, as a function from question to answer; None if it isn't set up.
+
+    PURPOSE     The app's way in to the Foundry hosted agent, signed in as whoever runs the app.
+    PSEUDOCODE  FOUNDRY_PROJECT_ENDPOINT or PLANT_OPS_AGENT_NAME not set -> None
+                ask(question) = the hosted agent's answer, over the Responses protocol, signed in with
+                                DefaultAzureCredential (your az login here; a managed identity in Azure)
+    """
+    endpoint, name = os.environ.get("FOUNDRY_PROJECT_ENDPOINT"), os.environ.get("PLANT_OPS_AGENT_NAME")
+    if not (endpoint and name):
+        return None
+
+    def ask(question: str) -> str:
+        from azure.ai.projects import AIProjectClient  # only POST /ask needs Azure's packages
+        from azure.identity import DefaultAzureCredential
+
+        with (DefaultAzureCredential() as credential,
+              AIProjectClient(endpoint=endpoint, credential=credential, allow_preview=True) as project,
+              project.get_openai_client(agent_name=name) as openai):
+            return openai.responses.create(input=question).output_text
+
+    return ask
+
+
+def create_app(history_csv: str | Path = DATA / "production_history.csv",
+               ask: Callable[[str], str] | None = None) -> FastAPI:
     """Build the app around a store loaded from the history file.
 
     PURPOSE     One place that wires the store, the reference data and the routes together. Tests build a
@@ -29,6 +61,8 @@ def create_app(history_csv: str | Path = DATA / "production_history.csv") -> Fas
                 GET  /plants/{id}/scrap-rate   -> that plant's scrap rate from start to end, or 404
                 POST /imports                  -> run every rule on an uploaded batch file;
                                                   all pass: load it (201); any fail: load nothing (422)
+                POST /ask                      -> the assistant's answer to a question: ask, or the hosted
+                                                  assistant when the environment names it (Part 7)
     """
     store = BatchStore.from_csv(history_csv)
     sku_ids, asset_plants = load_sku_ids(), load_asset_plants()
@@ -73,5 +107,24 @@ def create_app(history_csv: str | Path = DATA / "production_history.csv") -> Fas
             return JSONResponse(status_code=422, content={"accepted": 0, "failures": failures})
         store.add(batches)
         return {"accepted": len(batches)}
+
+    @app.post("/ask")
+    def ask_assistant(body: Question) -> dict:
+        """Ask the Plant Ops assistant a question in plain English.
+
+        PURPOSE     Plant managers ask in words instead of building a URL; the hosted agent answers.
+        PSEUDOCODE  answerer = ask, or the hosted assistant; neither -> 503 naming the settings it needs
+                    answer = answerer(question); it fails -> 502, so a broken assistant never looks like a bad question
+                    return the question and the answer
+        """
+        answerer = ask or hosted_assistant()
+        if answerer is None:
+            raise HTTPException(status_code=503, detail="The assistant isn't set up: set FOUNDRY_PROJECT_ENDPOINT "
+                                                        "and PLANT_OPS_AGENT_NAME")
+        try:
+            answer = answerer(body.question)
+        except Exception as e:  # whatever went wrong is the assistant's, not the caller's
+            raise HTTPException(status_code=502, detail=f"The assistant failed: {e}") from e
+        return {"question": body.question, "answer": answer}
 
     return app

@@ -55,3 +55,15 @@ def test_every_tool_is_described_for_the_model(tools):
         assert t.description and "PSEUDOCODE" not in t.description      # the model reads this; people read the docstring
         for name, schema in t.parameters()["properties"].items():
             assert schema.get("description"), f"{t.name}({name}) has no description for the model"
+
+
+def test_square_feet_per_run_hour_september(tools):
+    result = tools.square_feet_per_run_hour("2026-09-01", "2026-09-30")["rates"]
+    by_plant = {r["plant_id"]: r["square_feet_per_run_hour"] for r in result}
+    assert (by_plant["P01"], by_plant["P02"]) == (63396.4, 36934.8)
+    assert (result[0]["plant_id"], result[0]["square_feet_per_run_hour"]) == ("P08", 69848.8)
+
+
+def test_square_feet_per_run_hour_errors_like_scrap_rates(tools):
+    assert "2026-09-01" in tools.square_feet_per_run_hour("2026-08-01", "2026-08-31")["error"]
+    assert "YYYY-MM-DD" in tools.square_feet_per_run_hour("2026-13-01", "2026-09-30")["error"]

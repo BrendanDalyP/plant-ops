@@ -5,8 +5,9 @@ PURPOSE  The rules a scrap rate must follow, checked on small, hand-made batches
 
 from datetime import date, datetime
 
-from plant_ops.batches import Batch
-from plant_ops.stats import scrap_rate_by_plant
+from plant_ops.batches import Batch, read_batches
+from plant_ops.reference_data import DATA
+from plant_ops.stats import scrap_rate_by_plant, square_feet_per_run_hour_by_plant
 
 SEPTEMBER = (date(2026, 9, 1), date(2026, 9, 30))
 
@@ -39,3 +40,14 @@ def test_each_plant_is_reported_separately():
 def test_plant_with_nothing_produced_has_no_rate():
     batches = [make("P01", date(2026, 9, 15), 0, 0)]
     assert scrap_rate_by_plant(batches, *SEPTEMBER) == {"P01": None}
+
+
+def test_square_feet_per_run_hour_is_total_produced_over_total_hours():
+    batches = [make("P01", date(2026, 9, 10), 800, 0), make("P01", date(2026, 9, 11), 400, 50)]  # 8.0 hours each
+    assert square_feet_per_run_hour_by_plant(batches, *SEPTEMBER) == {"P01": 75.0}
+
+
+def test_square_feet_per_run_hour_for_p01_in_september():
+    # the issue's number, worked out by hand: 86,408,665 square feet in 1,362.99 run hours
+    history = read_batches(DATA / "production_history.csv")
+    assert square_feet_per_run_hour_by_plant(history, *SEPTEMBER)["P01"] == 63396.4
