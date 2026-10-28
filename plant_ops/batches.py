@@ -7,6 +7,7 @@ PURPOSE  Turn a batch CSV (the plants' export format) into typed Batch objects. 
 from __future__ import annotations
 
 import csv
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -31,27 +32,35 @@ class Batch:
 def read_batches(path: str | Path) -> list[Batch]:
     """Read a batch CSV into Batch objects, in file order.
 
-    PURPOSE     One place that knows the CSV layout and the type of every column.
-    PSEUDOCODE  open the file; for each row from csv.DictReader:
-                    convert each column to its field's type (date, datetime, float, int)
-                    append a Batch
-                return the list
+    PURPOSE     Batch files on disk: the history, and the files in data/.
+    PSEUDOCODE  open the file; return parse_batches(its lines)
+    """
+    with open(path, newline="", encoding="utf-8") as f:
+        return parse_batches(f)
+
+
+def parse_batches(lines: Iterable[str]) -> list[Batch]:
+    """Turn the lines of a batch CSV, header first, into Batch objects in order.
+
+    PURPOSE     The same parsing for a file on disk and for an upload that only exists in memory.
+    PSEUDOCODE  for each row from csv.DictReader(lines):
+                    convert each column to its field's type; append a Batch
+                a missing column raises KeyError; a bad number or date raises ValueError
     """
     batches = []
-    with open(path, newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            batches.append(
-                Batch(
-                    batch_id=row["BatchId"],
-                    plant_id=row["PlantId"],
-                    asset_id=row["AssetId"],
-                    sku_id=row["SkuId"],
-                    shift_date=date.fromisoformat(row["ShiftDate"]),
-                    shift_start=datetime.strptime(row["ShiftStart"], "%Y-%m-%d %H:%M:%S"),
-                    shift=row["Shift"],
-                    run_hours=float(row["RunHours"]),
-                    square_feet_produced=int(row["SquareFeetProduced"]),
-                    scrap_square_feet=int(row["ScrapSquareFeet"]),
-                )
+    for row in csv.DictReader(lines):
+        batches.append(
+            Batch(
+                batch_id=row["BatchId"],
+                plant_id=row["PlantId"],
+                asset_id=row["AssetId"],
+                sku_id=row["SkuId"],
+                shift_date=date.fromisoformat(row["ShiftDate"]),
+                shift_start=datetime.strptime(row["ShiftStart"], "%Y-%m-%d %H:%M:%S"),
+                shift=row["Shift"],
+                run_hours=float(row["RunHours"]),
+                square_feet_produced=int(row["SquareFeetProduced"]),
+                scrap_square_feet=int(row["ScrapSquareFeet"]),
             )
+        )
     return batches
