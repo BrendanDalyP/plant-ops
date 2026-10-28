@@ -6,3 +6,10 @@ pytest==9.2.0
 ruff==0.17.3
 pyspark==4.1.4
 PyYAML==6.0.3
+agent-framework-core==1.24.0
+agent-framework-foundry==1.16.0
+agent-framework-foundry-hosting==1.0.0b261030
+azure-ai-projects==2.7.0
+azure-identity==1.27.0
+azure-monitor-opentelemetry==1.8.11
+python-dotenv==1.2.4
