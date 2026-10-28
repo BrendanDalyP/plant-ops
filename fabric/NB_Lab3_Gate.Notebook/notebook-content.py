@@ -83,6 +83,8 @@ def rules(df):
         "Scrap is not more than produced": df.filter("ScrapSquareFeet > SquareFeetProduced"),
         # 8. a batch that ran ran for some time, and a shift is at most 12 hours (a missing value fails too)
         "RunHours is greater than 0 and at most 12": df.filter("RunHours IS NULL OR RunHours <= 0 OR RunHours > 12"),
+        # 9. a shift code gold has never seen is a keying error, or a new shift nobody told us about
+        "Shift is one of the values already in gold": df.join(gold.select("Shift").distinct(), "Shift", "left_anti"),
     }
 print("rules defined:", [name for name, rows in rules(staged).items() if rows is not None])
 

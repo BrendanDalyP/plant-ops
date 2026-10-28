@@ -48,3 +48,10 @@ def test_run_hours_rule_catches_a_breaking_batch(rules, make_batch, hours):
 
 def test_run_hours_rule_allows_exactly_12(rules, make_batch):
     assert rules(make_batch(RunHours=12.0))[HOURS].count() == 0
+
+
+def test_shift_rule_catches_a_breaking_batch(rules, make_batch):
+    """PURPOSE     A shift gold has never seen breaks rule 9.
+    PSEUDOCODE  batch X00001 with Shift D -> rule 9 finds exactly that one row
+    """
+    assert rules(make_batch(Shift="D"))["Shift is one of the values already in gold"].count() == 1
