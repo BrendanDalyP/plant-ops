@@ -10,11 +10,15 @@ A small Python 3.11 app. It reads the plants' production batch files, checks the
 - `plant_ops/api.py`: the web API, built by `create_app()`
 - `data/`: test data. Never edit these files
 - `docs/rules.md`: the rules in plain English, with their expected results
+- `assistant/`: the Plant Ops assistant, an Agent Framework agent on a Foundry model. `agent.py` builds it, `tools.py` holds its tools
+- `docs/assistant.md`: the assistant's spec: its tools, and the answers it must give, worked out by hand
+- `tests/assistant/`: the assistant's tests, which use a scripted stand-in for the model and never call Foundry
 
 ## Commands
 
 - `pytest -q` runs the tests and `ruff check .` the linter. Both pass before every commit.
 - `uvicorn plant_ops.api:create_app --factory --reload` runs the API on port 8000.
+- `python -m assistant "<question>"` asks the assistant one question, with the settings in `.env`.
 
 ## Conventions
 
