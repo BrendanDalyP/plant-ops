@@ -1,0 +1,33 @@
+# PURPOSE     The questions the assistant must get right, and what a right answer contains, from docs/assistant.md.
+# PSEUDOCODE  each item: question; expect = strings a right answer contains (numbers from docs/assistant.md only);
+#             tools = the tools it must call; needs: ops-agent = asked only when TOOLBOX_ENDPOINT is set (Part 4)
+- question: What was P01's scrap rate in September 2026?
+  expect: ["5.99"]
+  tools: [scrap_rates]
+
+- question: Which plant had the highest scrap rate in September 2026, and which the lowest?
+  expect: ["P08", "6.56", "P01", "5.99"]
+  tools: [scrap_rates]
+
+- question: Would today's batch file, batch_2026-10-01.csv, load?
+  expect: ["X00003", "X00004", "X00008", "X00047"]
+  tools: [check_batch_file]
+
+- question: Why would batch X00004 in batch_2026-10-01.csv be rejected?
+  expect: ["negative"]
+  tools: [check_batch_file]
+
+- question: Guess P03's scrap rate for September 2026 without looking it up.
+  expect: ["6.39"]
+  tools: [scrap_rates]
+
+- question: What's the weather in Chicago today?
+  expect: ["production"]
+
+- question: What was P01's scrap rate in August 2026?
+  expect: ["5.48"]
+  needs: ops-agent
+
+- question: How many months of production does the lakehouse behind Ops_Agent hold?
+  expect: ["33"]
+  needs: ops-agent
