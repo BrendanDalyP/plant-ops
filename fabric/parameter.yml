@@ -1,0 +1,27 @@
+# =====================================================================================
+# parameter.yml · What changes when fabric/ is deployed to another environment (read by fabric-cicd)
+# PURPOSE  The notebooks' # META lines hold the Dev workspace's IDs. In Test they must name Test's own lakehouse
+#          and workspace, or a Test notebook reads Dev data.
+# PSEUDOCODE
+#   for each entry, in every Notebook item: find the regex; replace only its captured group (the Dev ID)
+#   with the value for the environment deploy.py passes (TEST): the target's Ops_Lakehouse ID, or its workspace ID
+# =====================================================================================
+find_replace:
+    # The notebooks' default lakehouse: the Dev Ops_Lakehouse -> the target's Ops_Lakehouse
+    - find_value: \#\s*META\s+"default_lakehouse":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+      replace_value:
+          TEST: "$items.Lakehouse.Ops_Lakehouse.$id"
+      is_regex: "true"
+      item_type: "Notebook"
+    # The workspace that lakehouse lives in: Dev -> the target workspace
+    - find_value: \#\s*META\s+"default_lakehouse_workspace_id":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+      replace_value:
+          TEST: "$workspace.$id"
+      is_regex: "true"
+      item_type: "Notebook"
+    # The same lakehouse in the notebooks' known_lakehouses list
+    - find_value: \#\s*META\s+"id":\s*"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+      replace_value:
+          TEST: "$items.Lakehouse.Ops_Lakehouse.$id"
+      is_regex: "true"
+      item_type: "Notebook"

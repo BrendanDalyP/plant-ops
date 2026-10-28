@@ -1,18 +1,47 @@
-# deploy.yml · Deploy to Test. Finished in Part 7.
-# PURPOSE  Publish fabric/ to the Test workspace with fabric-cicd after a merge to main, then check it.
-#          Until Part 7 it only runs by hand, so merging Day 5's work deploys nothing.
-# TODO 1 trigger:     a push to main that changes fabric/, deploy/ or this file; and by hand
-# TODO 2 permissions: id-token: write (an OIDC token for azure/login) and contents: read, nothing else
-# TODO 3 job:         deploy-test, in the GitHub environment "test" (its reviewer approves each run)
-# TODO 4 sign-in:     azure/login with vars.AZURE_CLIENT_ID, vars.AZURE_TENANT_ID and allow-no-subscriptions: true
-# TODO 5 steps:       checkout; Python 3.11; pip install fabric-cicd 1.4.0 and azure-identity (pinned) and requests;
-#                     python deploy/deploy.py with WORKSPACE_ID from vars.TEST_WORKSPACE_ID and ENVIRONMENT TEST;
-#                     python deploy/verify.py with the same WORKSPACE_ID
+# =====================================================================================
+# deploy.yml · Deploy to Test
+# PURPOSE  Publish fabric/ to the Test workspace with fabric-cicd after a merge to main, signed in as the
+#          deployment app with no stored secret, then check that every notebook points at Test's own lakehouse.
+# PSEUDOCODE
+#   on a push to main that changes fabric/, deploy/ or this file (or by hand):
+#     wait for the "test" environment's reviewer to approve
+#     sign the Azure CLI in as the deployment app (OIDC token -> Entra token)
+#     deploy.py: publish fabric/ with parameter.yml's TEST values; verify.py: read Test back and check it
+# =====================================================================================
 name: Deploy to Test
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]                                         # only main deploys
+    paths: ["fabric/**", "deploy/**", ".github/workflows/deploy.yml"]   # and only when these change
+  workflow_dispatch:                                         # a button in Actions, to re-run by hand
+permissions:
+  id-token: write        # azure/login exchanges this OIDC token for the app's Entra token: no secret stored
+  contents: read         # check out the repo; nothing else
+concurrency:
+  group: deploy-test     # one deployment at a time; a second waits
+  cancel-in-progress: false
 jobs:
   deploy-test:
     runs-on: ubuntu-latest
+    environment: test                                        # its reviewer approves; its variables are read as vars.NAME
+    timeout-minutes: 20
     steps:
-      - run: echo "Not written yet: Part 7"
+      - uses: actions/checkout@v4                            # the merged main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install fabric-cicd==1.4.0 azure-identity==1.27.0 requests   # pinned: a deploy is repeatable
+      - uses: azure/login@v3                                 # signs this runner's Azure CLI in as the app
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}             # the deployment app (on the board)
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true                       # the app has Fabric rights, no Azure subscription
+      - name: Deploy
+        run: python deploy/deploy.py
+        env:
+          WORKSPACE_ID: ${{ vars.TEST_WORKSPACE_ID }}        # where to publish
+          ENVIRONMENT: TEST                                  # which values in fabric/parameter.yml
+      - name: Verify
+        run: python deploy/verify.py
+        env:
+          WORKSPACE_ID: ${{ vars.TEST_WORKSPACE_ID }}
