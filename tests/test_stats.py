@@ -34,3 +34,8 @@ def test_batches_outside_the_period_are_ignored():
 def test_each_plant_is_reported_separately():
     batches = [make("P01", date(2026, 9, 15), 200, 2), make("P03", date(2026, 9, 15), 100, 3)]
     assert scrap_rate_by_plant(batches, *SEPTEMBER) == {"P01": 1.0, "P03": 3.0}
+
+
+def test_plant_with_nothing_produced_has_no_rate():
+    batches = [make("P01", date(2026, 9, 15), 0, 0)]
+    assert scrap_rate_by_plant(batches, *SEPTEMBER) == {"P01": None}
