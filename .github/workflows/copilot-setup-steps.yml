@@ -1,0 +1,28 @@
+# Prepares Copilot cloud agent's environment before it starts work: the same tools CI uses,
+# so the agent can run the tests itself. The job MUST be called copilot-setup-steps, and Copilot
+# reads this file from the default branch only. It runs on its own when the file changes, so a
+# broken setup shows up as a failed check.
+name: Copilot Setup Steps
+on:
+  workflow_dispatch:
+  push:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+  pull_request:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: actions/setup-java@v4    # the gate notebook's tests (Day 5) run on local Spark, which needs Java
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: pip install -r requirements-dev.txt

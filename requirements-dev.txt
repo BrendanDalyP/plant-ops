@@ -1,0 +1,8 @@
+fastapi==0.162.0
+uvicorn==0.54.0
+python-multipart==0.0.32
+httpx2==2.16.0
+pytest==9.2.0
+ruff==0.17.3
+pyspark==4.1.4
+PyYAML==6.0.3

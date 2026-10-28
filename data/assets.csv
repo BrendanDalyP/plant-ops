@@ -1,0 +1,31 @@
+AssetId,PlantId,AssetType
+CH-CORR-01,P01,Corrugator
+CH-CORR-02,P01,Corrugator
+CH-DC-01,P01,Die-cutter
+CH-FG-01,P01,Flexo folder-gluer
+RF-DC-01,P02,Die-cutter
+RF-DC-02,P02,Die-cutter
+RF-FG-01,P02,Flexo folder-gluer
+MN-CORR-01,P03,Corrugator
+MN-CORR-02,P03,Corrugator
+MN-DC-01,P03,Die-cutter
+MN-FG-01,P03,Flexo folder-gluer
+IN-CORR-01,P04,Corrugator
+IN-CORR-02,P04,Corrugator
+IN-DC-01,P04,Die-cutter
+IN-FG-01,P04,Flexo folder-gluer
+FW-CORR-01,P05,Corrugator
+FW-CORR-02,P05,Corrugator
+FW-DC-01,P05,Die-cutter
+FW-FG-01,P05,Flexo folder-gluer
+TU-DC-01,P06,Die-cutter
+TU-DC-02,P06,Die-cutter
+TU-FG-01,P06,Flexo folder-gluer
+PX-CORR-01,P07,Corrugator
+PX-CORR-02,P07,Corrugator
+PX-DC-01,P07,Die-cutter
+PX-FG-01,P07,Flexo folder-gluer
+HB-CORR-01,P08,Corrugator
+HB-CORR-02,P08,Corrugator
+HB-DC-01,P08,Die-cutter
+HB-FG-01,P08,Flexo folder-gluer

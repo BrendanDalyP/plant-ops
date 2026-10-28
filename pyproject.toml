@@ -1,0 +1,13 @@
+[project]
+name = "plant-ops"
+version = "0.1.0"
+description = "Production batches, their quality rules, and a small API: the practice app for the Copilot build-along"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = [".specify", ".github/skills", "fabric"]   # fabric/ is written by Fabric: notebook code uses spark and display

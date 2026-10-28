@@ -1,0 +1,22 @@
+# Runs the linter and the tests on every push to main and every pull request.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - uses: actions/setup-java@v4    # the gate notebook's tests (Day 5) run on local Spark, which needs Java
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: pytest -q
