@@ -79,6 +79,10 @@ def rules(df):
                                              .filter("MachinePlant IS NULL OR MachinePlant <> PlantId")),
         # 6. rows already in gold: loading them again would count them twice
         "BatchId is not already loaded": df.join(gold.select("BatchId"), "BatchId", "left_semi"),
+        # 7. a batch can't scrap more board than it made
+        "Scrap is not more than produced": df.filter("ScrapSquareFeet > SquareFeetProduced"),
+        # 8. a batch that ran ran for some time, and a shift is at most 12 hours (a missing value fails too)
+        "RunHours is greater than 0 and at most 12": df.filter("RunHours IS NULL OR RunHours <= 0 OR RunHours > 12"),
     }
 print("rules defined:", [name for name, rows in rules(staged).items() if rows is not None])
 
