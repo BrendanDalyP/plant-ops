@@ -10,6 +10,9 @@ A small Python 3.11 app. It reads the plants' production batch files, checks the
 - `plant_ops/api.py`: the web API, built by `create_app()`
 - `data/`: test data. Never edit these files
 - `docs/rules.md`: the rules in plain English, with their expected results
+- `fabric/`: the items Fabric's Git integration writes from the Dev workspace (the gate notebook, the lakehouse,
+  the semantic model). See `.github/instructions/fabric-*.instructions.md` before changing anything there
+- `tests/fabric/`: the gate notebook's tests, run on local Spark; `docs/measures.md`: the model's definitions
 
 ## Commands
 
