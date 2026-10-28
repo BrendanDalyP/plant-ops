@@ -19,6 +19,7 @@ EXPECTED = {  # docs/rules.md, last column
     "SkuId exists": 1,
     "PlantId is the machine's plant": 1,
     "BatchId is not already loaded": 0,
+    "Scrap is not more than produced": 0,
 }
 
 
@@ -59,3 +60,8 @@ def test_a_batch_already_loaded_breaks_rule_6(batches):
 def test_a_batch_without_an_id_breaks_rule_1(batches):
     no_id = replace(batches[0], batch_id="")
     assert run_rules([no_id])["BatchId is present"] == [no_id]
+
+
+def test_scrap_rule_catches_a_breaking_batch(batches):
+    too_much_scrap = replace(batches[0], scrap_square_feet=batches[0].square_feet_produced + 1)
+    assert run_rules([too_much_scrap])["Scrap is not more than produced"] == [too_much_scrap]

@@ -31,6 +31,7 @@ def check(
         # a machine that isn't in assets.csv has no plant, so it fails too
         "PlantId is the machine's plant": [b for b in batches if asset_plants.get(b.asset_id) != b.plant_id],
         "BatchId is not already loaded": [b for b in batches if b.batch_id in loaded_ids],
+        "Scrap is not more than produced": [b for b in batches if b.scrap_square_feet > b.square_feet_produced],
     }
 
 
