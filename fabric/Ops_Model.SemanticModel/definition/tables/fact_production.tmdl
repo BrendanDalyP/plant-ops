@@ -22,6 +22,12 @@ table fact_production
 		displayFolder: Quality
 		lineageTag: 6cf4b825-bf31-5446-875b-fa2a52e3492b
 
+	/// Good board produced per hour of machine run time: total good square feet divided by total run hours. A ratio of sums, never an average of batch rates.
+	measure 'Square Feet per Run Hour' = DIVIDE ( [Square Feet Produced], SUM ( fact_production[RunHours] ) )
+		formatString: #,0.0
+		displayFolder: Output
+		lineageTag: 4e7da7f3-87bd-5a45-804b-7e7886a5f630
+
 	column BatchId
 		dataType: string
 		lineageTag: 3aa9815a-e5db-5a2d-a1b9-acdbc43023ba
