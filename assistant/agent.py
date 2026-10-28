@@ -12,6 +12,8 @@ from agent_framework import Agent
 from agent_framework.foundry import FoundryChatClient
 from azure.identity import DefaultAzureCredential
 
+from assistant.tools import TOOLS
+
 NAME = "plant-ops-assistant"
 
 INSTRUCTIONS = """You are the Plant Ops assistant. You answer plant managers' questions about production at the
@@ -31,10 +33,10 @@ def build_agent(client=None, *, credential=None) -> Agent:
                 the Foundry project's model.
     PSEUDOCODE  client = the one given, or the model deployment named in the environment, in the Foundry project
                          named in the environment, signed in as you
-                return an Agent with the name and instructions above, and no tools yet
+                return an Agent with the name and instructions above, and this app's tools
     """
     credential = credential or DefaultAzureCredential()
     if client is None:
         client = FoundryChatClient(project_endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
                                    model=os.environ["AZURE_AI_MODEL_DEPLOYMENT_NAME"], credential=credential)
-    return Agent(client=client, name=NAME, instructions=INSTRUCTIONS)
+    return Agent(client=client, name=NAME, instructions=INSTRUCTIONS, tools=TOOLS)
