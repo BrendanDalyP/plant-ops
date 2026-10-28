@@ -32,6 +32,7 @@ def check(
         "PlantId is the machine's plant": [b for b in batches if asset_plants.get(b.asset_id) != b.plant_id],
         "BatchId is not already loaded": [b for b in batches if b.batch_id in loaded_ids],
         "Scrap is not more than produced": [b for b in batches if b.scrap_square_feet > b.square_feet_produced],
+        "RunHours is greater than 0 and at most 12": [b for b in batches if not 0 < b.run_hours <= 12],
     }
 
 

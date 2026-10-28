@@ -20,6 +20,7 @@ EXPECTED = {  # docs/rules.md, last column
     "PlantId is the machine's plant": 1,
     "BatchId is not already loaded": 0,
     "Scrap is not more than produced": 0,
+    "RunHours is greater than 0 and at most 12": 0,
 }
 
 
@@ -65,3 +66,14 @@ def test_a_batch_without_an_id_breaks_rule_1(batches):
 def test_scrap_rule_catches_a_breaking_batch(batches):
     too_much_scrap = replace(batches[0], scrap_square_feet=batches[0].square_feet_produced + 1)
     assert run_rules([too_much_scrap])["Scrap is not more than produced"] == [too_much_scrap]
+
+
+@pytest.mark.parametrize("hours", [0, -1.5, 12.01])
+def test_run_hours_rule_catches_a_breaking_batch(batches, hours):
+    bad_hours = replace(batches[0], run_hours=hours)
+    assert run_rules([bad_hours])["RunHours is greater than 0 and at most 12"] == [bad_hours]
+
+
+def test_run_hours_rule_allows_exactly_12(batches):
+    twelve = replace(batches[0], run_hours=12.0)
+    assert run_rules([twelve])["RunHours is greater than 0 and at most 12"] == []
