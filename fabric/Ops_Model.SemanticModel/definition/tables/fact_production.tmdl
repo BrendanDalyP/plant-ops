@@ -1,0 +1,95 @@
+table fact_production
+	lineageTag: 550b5965-87fb-53cb-b3b4-7dd2df194bd4
+
+	/// Total good board produced, in square feet: SUM of SquareFeetProduced.
+	measure 'Square Feet Produced' = SUM ( fact_production[SquareFeetProduced] )
+		displayFolder: Output
+		lineageTag: b5479136-4925-567a-83de-8c5f8e7f8d7e
+
+	/// Good square feet attributed to each SKU's current attributes (inactive relationship on SkuId), for 'as the SKU is today' questions.
+	measure 'Square Feet Produced (SKU as-is)' = CALCULATE ( [Square Feet Produced], USERELATIONSHIP ( fact_production[SkuId], dim_sku_current[SkuId] ) )
+		displayFolder: Output
+		lineageTag: f9142006-0411-5751-a0e2-fbbad8bf15dd
+
+	/// Total board scrapped, in square feet.
+	measure 'Scrap Square Feet' = SUM ( fact_production[ScrapSquareFeet] )
+		displayFolder: Quality
+		lineageTag: f42085db-28d2-5650-9570-6c5592371fd1
+
+	/// Share of total board run that was scrapped: scrap square feet divided by good plus scrap square feet. A ratio of sums, never an average of batch rates.
+	measure 'Scrap Rate %' = DIVIDE ( [Scrap Square Feet], [Square Feet Produced] + [Scrap Square Feet] )
+		formatString: 0.0%
+		displayFolder: Quality
+		lineageTag: 6cf4b825-bf31-5446-875b-fa2a52e3492b
+
+	column BatchId
+		dataType: string
+		lineageTag: 3aa9815a-e5db-5a2d-a1b9-acdbc43023ba
+		summarizeBy: none
+		sourceColumn: BatchId
+
+	column PlantId
+		dataType: string
+		lineageTag: 365b137e-c4c6-5bbe-b376-2e4d7e20fcd9
+		summarizeBy: none
+		sourceColumn: PlantId
+
+	column AssetId
+		dataType: string
+		lineageTag: 57e72cd0-5bea-51d6-b3e1-b30b4a06ad9e
+		summarizeBy: none
+		sourceColumn: AssetId
+
+	column SkuId
+		dataType: string
+		lineageTag: f9ef1944-3fdc-58d2-ab93-b5825f5adaf7
+		summarizeBy: none
+		sourceColumn: SkuId
+
+	column SkuKey
+		dataType: int64
+		lineageTag: 222a291a-31e0-5189-8d96-c941e1468e9f
+		summarizeBy: none
+		sourceColumn: SkuKey
+
+	column ShiftDate
+		dataType: dateTime
+		lineageTag: ec5497f4-c0f7-5384-af86-53199be2fb2c
+		summarizeBy: none
+		sourceColumn: ShiftDate
+
+	column ShiftStart
+		dataType: dateTime
+		lineageTag: 8d95f7f6-8341-5e1f-b27d-ca39eccb9e3e
+		summarizeBy: none
+		sourceColumn: ShiftStart
+
+	column Shift
+		dataType: string
+		lineageTag: 2ecb7b80-a85f-52c7-aef9-0665933e8f79
+		summarizeBy: none
+		sourceColumn: Shift
+
+	column RunHours
+		dataType: double
+		lineageTag: 9026e72c-72d2-5cc0-9cf2-3fecd765e78f
+		summarizeBy: sum
+		sourceColumn: RunHours
+
+	column SquareFeetProduced
+		dataType: int64
+		lineageTag: 53300ae5-5d47-5d27-8621-70eb8685f54b
+		summarizeBy: sum
+		sourceColumn: SquareFeetProduced
+
+	column ScrapSquareFeet
+		dataType: int64
+		lineageTag: 76d4fbde-cc73-5f3d-a77d-fed54828d3a5
+		summarizeBy: sum
+		sourceColumn: ScrapSquareFeet
+
+	partition fact_production = entity
+		mode: directLake
+		source
+			entityName: fact_production
+			expressionSource: 'DirectLake - Ops_Lakehouse'

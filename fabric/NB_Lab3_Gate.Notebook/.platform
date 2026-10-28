@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "NB_Lab3_Gate",
+    "description": "Session 3 quality gate: rules, quarantine, load"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "7d3a9e51-2c4b-4f86-9a1e-5b0c8d2f6e43"
+  }
+}
