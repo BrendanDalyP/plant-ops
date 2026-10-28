@@ -1,0 +1,18 @@
+# deploy.yml · Deploy to Test. Finished in Part 7.
+# PURPOSE  Publish fabric/ to the Test workspace with fabric-cicd after a merge to main, then check it.
+#          Until Part 7 it only runs by hand, so merging Day 5's work deploys nothing.
+# TODO 1 trigger:     a push to main that changes fabric/, deploy/ or this file; and by hand
+# TODO 2 permissions: id-token: write (an OIDC token for azure/login) and contents: read, nothing else
+# TODO 3 job:         deploy-test, in the GitHub environment "test" (its reviewer approves each run)
+# TODO 4 sign-in:     azure/login with vars.AZURE_CLIENT_ID, vars.AZURE_TENANT_ID and allow-no-subscriptions: true
+# TODO 5 steps:       checkout; Python 3.11; pip install fabric-cicd 1.4.0 and azure-identity (pinned) and requests;
+#                     python deploy/deploy.py with WORKSPACE_ID from vars.TEST_WORKSPACE_ID and ENVIRONMENT TEST;
+#                     python deploy/verify.py with the same WORKSPACE_ID
+name: Deploy to Test
+on:
+  workflow_dispatch:
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Not written yet: Part 7"
