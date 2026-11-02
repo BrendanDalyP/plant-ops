@@ -10,6 +10,7 @@ Every batch in a file must pass every rule before any batch from that file is lo
 | 4 | SkuId exists | its SkuId isn't in `data/skus.csv` | 1 |
 | 5 | PlantId is the machine's plant | its AssetId isn't in `data/assets.csv`, or the machine stands in another plant | 1 |
 | 6 | BatchId is not already loaded | its BatchId is already in the store (the history) | 0 |
+| 7 | RunHours is greater than 0 and at most 12 | its RunHours is 0 or less, or greater than 12 | 0 |
 
 48 of the file's 53 batches break no rule.
 
