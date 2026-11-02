@@ -6,7 +6,7 @@ PURPOSE  Turn a batch CSV (the plants' export format) into typed Batch objects. 
 
 from __future__ import annotations
 
-import csv  # noqa: F401  (read_batches uses it once you write it)
+import csv 
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -37,4 +37,23 @@ def read_batches(path: str | Path) -> list[Batch]:
                     append a Batch
                 return the list
     """
-    raise NotImplementedError("Part 2: write this with Copilot's suggestions")
+    batches = []
+    with open(path, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            batches.append(
+                Batch(
+                    batch_id=row["BatchId"],
+                    plant_id=row["PlantId"],
+                    asset_id=row["AssetId"],
+                    sku_id=row["SkuId"],
+                    shift_date=datetime.strptime(row["ShiftDate"], "%Y-%m-%d").date(),
+                    shift_start=datetime.strptime(row["ShiftStart"], "%Y-%m-%d %H:%M:%S"),
+                    shift=row["Shift"],
+                    run_hours=float(row["RunHours"]),
+                    square_feet_produced=int(row["SquareFeetProduced"]),
+                    scrap_square_feet=int(row["ScrapSquareFeet"]),
+                )
+            )
+    return batches
+
